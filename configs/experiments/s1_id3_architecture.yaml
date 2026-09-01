@@ -1,0 +1,34 @@
+# S1-ID-3 architecture experiment: transparent combiner vs CNN fine-tuned vs CNN from scratch.
+name: s1_id3_architecture
+split: configs/splits/s1_locked.json          # created by `adept splits make`
+criteria_config: configs/models/criteria.yaml
+target_sensitivity: 0.90
+n_boot: 2000
+seed: 7
+arms:
+  combiner:
+    type: criterion_combiner
+  cnn_finetune:
+    type: adequacy_cnn
+    backbone: efficientnet_b0
+    pretrained: true
+    use_criteria: true
+    epochs: 30
+    lr: 3.0e-4
+    pos_weight: 3.0
+    tile_px: 224
+  cnn_scratch:
+    type: adequacy_cnn
+    backbone: efficientnet_b0
+    pretrained: false
+    use_criteria: true
+    epochs: 60
+    lr: 1.0e-3
+    pos_weight: 3.0
+    tile_px: 224
+ablation:
+  drop_each_criterion: true
+report:
+  per_group: [instrument, site]
+  calibration_curve: true
+  failure_gallery: true

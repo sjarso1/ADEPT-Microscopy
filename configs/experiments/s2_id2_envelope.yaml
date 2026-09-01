@@ -1,0 +1,12 @@
+# S2-ID-2 generalisation envelope: sweep each stress axis until a target is crossed.
+name: s2_id2_envelope
+model: artifacts/weights/s2_carry_forward.pt
+axes:
+  stain:        {levels: [0, 2, 4, 6, 8, 10, 15, 20, 30]}       # degrees of stain-vector rotation
+  focus:        {levels: [0, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0]} # blur sigma, px
+  illumination: {levels: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.7]}      # vignetting strength
+targets: {sensitivity: 0.90, specificity: 0.85, auroc: 0.92}
+anchor_to_real_variation: data/lmic_partner/observed_variation.json
+adaptation:
+  method: "<e.g. DANN / test-time BN adaptation>"
+  re_measure_envelope: true

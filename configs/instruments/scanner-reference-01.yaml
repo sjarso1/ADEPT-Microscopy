@@ -1,0 +1,10 @@
+id: scanner-reference-01
+site: jhu
+class: scanner
+objective: "20x"
+camera: "vendor"
+illumination: "vendor"
+overview_microns_per_pixel: 2.0   # downsampled from 0.5
+hr_microns_per_pixel: 0.5
+kit_id: kit-A
+notes: "Reference commercial slide scanner; defines the reference concentration scale for per-stain gains."

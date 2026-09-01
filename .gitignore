@@ -1,0 +1,61 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Notebooks ---
+.ipynb_checkpoints/
+
+# --- Experiment tracking ---
+wandb/
+mlruns/
+runs/
+lightning_logs/
+
+# --- Data & artifacts (never commit patient data) ---
+data/*
+!data/README.md
+!data/*/
+data/*/*
+!data/*/.gitkeep
+artifacts/weights/*
+!artifacts/weights/.gitkeep
+artifacts/packages/*
+!artifacts/packages/.gitkeep
+results/
+# Small per-instrument calibration JSON files ARE tracked (artifacts/calibrations)
+*.tif
+*.tiff
+*.svs
+*.ndpi
+*.mrxs
+*.npy
+*.npz
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# --- Secrets ---
+.env
+*.pem
+*.key
+secrets/
+
+# --- OS / editors ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,12 @@
+# S3-ID-2 attention-MIL malignancy-suspicion model.
+name: s3_id2_mil
+split: configs/splits/s3_diagnostic_locked.json
+scope: binary            # or three_way, per the S3-ID-1 audit ADR
+encoder: s2_carry_forward   # or foundation_encoder, per the S3-ID-1 baseline
+tiles_per_slide: 64
+model: {type: attention_mil, hidden: 256, gated: true, dropout: 0.25}
+aggregation_experiment: {alternative: topk, k: 8}
+class_imbalance: {pos_weight: auto}
+targets: {sensitivity: 0.95, specificity: 0.80, auroc: 0.90}
+attention_concordance: {hit_rate_target: 0.80, top_k: 5}
+n_boot: 2000

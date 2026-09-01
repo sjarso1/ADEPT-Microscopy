@@ -1,0 +1,10 @@
+id: openflexure-mulago-01
+site: mulago
+class: openflexure
+objective: "4x (overview) / 40x (HR)"
+camera: "Raspberry Pi HQ camera"
+illumination: "white LED, condenser"
+overview_microns_per_pixel: 2.0   # to be measured from the resolution target
+hr_microns_per_pixel: 0.25
+kit_id: kit-A
+notes: "Primary deployment instrument; parallel hardware workstream handles stage characterisation and autofocus."

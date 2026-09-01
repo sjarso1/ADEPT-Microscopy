@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adept-microscopy"
+version = "0.1.0"
+description = "ADEPT — Automated Diagnostic-adequacy Evaluation and Prioritization of Tissue: closed-loop autonomous microscopy for breast-biopsy telepathology on the OpenFlexure platform."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+  { name = "ADEPT Consortium (UCI · Mulago NRH · Makerere · Johns Hopkins BME)" },
+]
+keywords = [
+  "digital-pathology", "telepathology", "openflexure", "microscopy",
+  "breast-biopsy", "adequacy", "stain-normalization", "multiple-instance-learning",
+  "global-health",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Image Processing",
+  "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "scikit-image>=0.21",
+  "scikit-learn>=1.3",
+  "opencv-python-headless>=4.8",
+  "pydantic>=2.0",
+  "pyyaml>=6.0",
+  "typer>=0.9",
+]
+
+[project.optional-dependencies]
+# Deep-learning stack for the adequacy classifier (Semester 1), domain
+# adaptation (Semester 2) and the MIL suspicion model (Semester 3).
+torch = ["torch>=2.1", "torchvision>=0.16", "timm>=0.9"]
+# Experiment tracking
+tracking = ["wandb>=0.16"]
+# Notebook / exploration
+notebooks = ["jupyterlab", "matplotlib>=3.7", "pandas>=2.0", "seaborn"]
+# Contributor tooling
+dev = [
+  "pytest>=7.4",
+  "pytest-cov",
+  "ruff>=0.4",
+  "mypy>=1.8",
+  "pre-commit",
+  "build",
+]
+all = ["adept-microscopy[torch,tracking,notebooks,dev]"]
+
+[project.scripts]
+adept = "adept.cli.main:app"
+
+[project.urls]
+Homepage = "https://github.com/sjarso1/adept-microscopy"
+Issues = "https://github.com/sjarso1/adept-microscopy/issues"
+Documentation = "https://github.com/sjarso1/adept-microscopy/tree/main/docs"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+adept = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "W"]
+ignore = ["N803", "N806", "B008"]  # H/E/OD-style names; typer.Option defaults are idiomatic
+
+[tool.ruff.lint.isort]
+known-first-party = ["adept"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+warn_unused_ignores = true

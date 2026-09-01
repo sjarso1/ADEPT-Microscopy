@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use ADEPT, please cite it as below."
+title: "ADEPT: Automated Diagnostic-adequacy Evaluation and Prioritization of Tissue"
+type: software
+version: 0.1.0
+date-released: 2026-09-01
+license: MIT
+repository-code: "https://github.com/sjarso1/adept-microscopy"
+abstract: >-
+  Closed-loop autonomous microscopy on the OpenFlexure platform for breast
+  core-needle biopsy telepathology in low- and middle-income countries.
+  ADEPT assesses specimen adequacy against five formal criteria in a
+  canonical, instrument-independent image space, drives targeted
+  high-resolution re-acquisition, ranks regions of interest, and packages
+  the result for remote pathologist review. All models are validated
+  leave-one-instrument-out.
+keywords:
+  - digital pathology
+  - telepathology
+  - OpenFlexure
+  - breast biopsy
+  - specimen adequacy
+  - stain normalization
+  - multiple-instance learning
+  - global health
+authors:
+  - family-names: Okecha
+    given-names: Tonny
+    affiliation: "Uganda Cancer Institute, Department of Pathology"
+  - family-names: Kalungi
+    given-names: Samuel
+    affiliation: "Mulago National Referral Hospital, Department of Pathology"
+  - family-names: Katumba
+    given-names: Andrew
+    affiliation: "Makerere University, College of Engineering, Design, Art and Technology"
+  - family-names: Jarso
+    given-names: Samson
+    affiliation: "Johns Hopkins University, Department of Biomedical Engineering"
+  - family-names: Atwine
+    given-names: Raymond
+    affiliation: "Uganda Cancer Institute, Mbarara Regional Referral Hospital"
+  - family-names: Beijuka
+    given-names: Bruno
+    affiliation: "Makerere University"

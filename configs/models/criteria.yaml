@@ -1,0 +1,15 @@
+# CriteriaConfig for real overview scans. EVERY VALUE IS A PLACEHOLDER to be
+# justified in S1-ID-2 from the paired-acquisition data and the pathologist
+# reason codes; record the justification as an ADR when you change one.
+microns_per_pixel: 2.0            # overview scan (≈4× objective on OpenFlexure)
+tissue_min_total_length_um: 3000.0
+tissue_min_core_length_um: 500.0
+tissue_min_core_count: 1
+tissue_od_threshold: 0.15
+cellularity_min_nuclei_per_mm2: 300.0
+staining_he_ratio_range: [0.35, 2.5]
+staining_min_h_od: 0.12
+focus_tile_px: 64
+focus_min_relative_sharpness: 0.35
+focus_min_fraction_in_focus: 0.6
+artifact_max_fraction: 0.25

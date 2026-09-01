@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="150" viewBox="0 0 720 150" role="img" aria-label="ADEPT banner">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5B2A86"/>
+      <stop offset="1" stop-color="#C2185B"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="150" rx="14" fill="#14121A"/>
+  <!-- stylised biopsy core (H&E-ish) -->
+  <g transform="translate(36,30)">
+    <rect x="0" y="34" width="120" height="22" rx="11" fill="url(#g)" opacity="0.9"/>
+    <rect x="0" y="34" width="120" height="22" rx="11" fill="none" stroke="#F4E3F0" stroke-width="1.5" opacity="0.5"/>
+    <circle cx="18" cy="45" r="3" fill="#2A0F4A"/><circle cx="34" cy="41" r="2.6" fill="#2A0F4A"/>
+    <circle cx="52" cy="47" r="3" fill="#2A0F4A"/><circle cx="70" cy="42" r="2.4" fill="#2A0F4A"/>
+    <circle cx="86" cy="46" r="3" fill="#2A0F4A"/><circle cx="104" cy="43" r="2.6" fill="#2A0F4A"/>
+    <!-- ROI box -->
+    <rect x="60" y="24" width="40" height="42" fill="none" stroke="#FFD166" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="61" y="20" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#FFD166">ROI #1</text>
+  </g>
+  <text x="190" y="66" font-family="Inter, Helvetica, Arial, sans-serif" font-size="44" font-weight="700" fill="#FFFFFF" letter-spacing="2">ADEPT</text>
+  <text x="192" y="92" font-family="Inter, Helvetica, Arial, sans-serif" font-size="14" fill="#D9CFE6">Automated Diagnostic-adequacy Evaluation and Prioritization of Tissue</text>
+  <text x="192" y="114" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#9E8FB5">calibrate once · canonical space · one frozen classifier · validated leave-one-instrument-out</text>
+</svg>

@@ -1,0 +1,15 @@
+# CriteriaConfig overrides for the synthetic dataset (adept synth make-dataset).
+# Synthetic slides are 256 px with cores ~120–220 px long; treating a pixel as
+# 10 µm makes a core ~1.2–2.2 mm, in the range of a real 14G core.
+microns_per_pixel: 10.0
+tissue_min_total_length_um: 1500.0
+tissue_min_core_length_um: 800.0
+tissue_min_core_count: 1
+tissue_od_threshold: 0.15
+cellularity_min_nuclei_per_mm2: 40.0
+staining_he_ratio_range: [0.2, 3.0]
+staining_min_h_od: 0.10
+focus_tile_px: 32
+focus_min_relative_sharpness: 0.25
+focus_min_fraction_in_focus: 0.6
+artifact_max_fraction: 0.25

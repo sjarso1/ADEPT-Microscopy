@@ -1,0 +1,13 @@
+# S2-ID-1: per-instrument suite (A) vs pooled raw (B) vs canonical (C) vs foundation encoder (D), under LOIO.
+name: s2_id1_three_arm_loio
+split: configs/splits/s1_locked.json
+instruments: [openflexure, printed3d, wsi, scanner]
+loio: true
+arms:
+  A_per_instrument: {type: adequacy_cnn, input: raw, per_instrument: true}
+  B_pooled_raw:     {type: adequacy_cnn, input: raw}
+  B_pooled_macenko: {type: adequacy_cnn, input: raw, normalisation: macenko}
+  C_canonical:      {type: adequacy_cnn, input: canonical}
+  D_foundation:     {type: foundation_encoder, encoder: "<research-licensed pathology FM>", head: linear}
+decision_rule: "non-overlapping 95% CIs on sensitivity and AUROC under LOIO; otherwise report null result"
+n_boot: 2000
