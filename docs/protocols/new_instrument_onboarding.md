@@ -42,7 +42,7 @@ instrument to the next training round.
 
 ### 4. Swap the front-end
 ```python
-pipe = AdequacyPipeline.load(...)                       # frozen classifier
+pipe = AdequacyPipeline.load(...)  # frozen classifier
 pipe = pipe.with_calibration(InstrumentCalibration.load("artifacts/calibrations/<site>.json"))
 ```
 Nothing else changes: the schema, the ROI actions and the packages are
