@@ -1,0 +1,422 @@
+# ADEPT — Semester 1 Kanban plan
+# 18 tickets across 7 fortnightly design reviews (DR1 = end of week 2 … DR7 = end of week 14).
+# WIP limit: ≤ 3 tickets in progress per design-review window.
+# Source: Course Agreement Semester 1 (14-week work plan, deliverables S1-ID-1..3 + final report).
+
+reviews:
+  - {id: DR1, title: "Design Review 1 — Weeks 1–2 (setup & reading)", weeks: [1, 2]}
+  - {id: DR2, title: "Design Review 2 — Weeks 3–4 (S1-ID-1 calibrations)", weeks: [3, 4]}
+  - {id: DR3, title: "Design Review 3 — Weeks 5–6 (S1-ID-1 due · criteria 1 & 3)", weeks: [5, 6]}
+  - {id: DR4, title: "Design Review 4 — Weeks 7–8 (criteria 2, 4 & 5)", weeks: [7, 8]}
+  - {id: DR5, title: "Design Review 5 — Weeks 9–10 (S1-ID-2 due · classifier training)", weeks: [9, 10]}
+  - {id: DR6, title: "Design Review 6 — Weeks 11–12 (validation · S1-ID-3 due)", weeks: [11, 12]}
+  - {id: DR7, title: "Design Review 7 — Weeks 13–14 (final report & archive)", weeks: [13, 14]}
+
+labels:
+  - {name: "S1-ID-1", color: "5B2A86", description: "Instrument calibrations and the canonical image space"}
+  - {name: "S1-ID-2", color: "C2185B", description: "Five criterion modules and invariance verification"}
+  - {name: "S1-ID-3", color: "FFD166", description: "Integrated classifier, reference-standard validation, ROI"}
+  - {name: "S1-final", color: "06D6A0", description: "Final report and Semester 1 archive"}
+  - {name: "setup", color: "9E8FB5", description: "Environment, reading, reference standard"}
+  - {name: "endpoint:minimum", color: "EDEDED", description: "Required for the Minimum endpoint"}
+  - {name: "endpoint:target", color: "BFDBFE", description: "Required for the Target endpoint"}
+  - {name: "endpoint:maximum", color: "FDE68A", description: "Required only for the Maximum endpoint"}
+  - {name: "depends:hardware", color: "F97316", description: "Blocked on the hardware workstream (kit images, paired acquisitions)"}
+  - {name: "depends:validation", color: "EF4444", description: "Blocked on the validation workstream (labels, pathologist time)"}
+
+tickets:
+  # ───────────────────────── DR1 · Weeks 1–2 ─────────────────────────
+  - key: T01
+    review: DR1
+    week: 1
+    labels: [setup, "endpoint:minimum"]
+    title: "Set up the ML environment, training infrastructure and experiment tracking"
+    body: |
+      **Week 1–2 · Setup.** Stand up everything the semester's code runs on, so that S1-ID-1 can start on day one of week 3.
+
+      **Definition of done**
+      - `pip install -e ".[dev,torch]"` works on the student's machine and on the lab/cloud GPU; `pytest` and `bash scripts/smoke_e2e.sh` pass.
+      - Weights & Biases (academic tier) project `adept-s1` exists; a smoke run is logged with the config hash.
+      - Data loaders read the slide registry (`adept.data.registry`) from the object store mirror under `data/`.
+      - OpenFlexure Python client cloned and importable (for reading acquisition metadata only — no microscope operation).
+
+      **Evidence for the design review:** a 5-minute demo of the smoke run end-to-end and the W&B run link.
+    subissues:
+      - title: "Dev environment on workstation + GPU: install extras, run tests and smoke script"
+        body: "Install `adept-microscopy[dev,torch]` on both the local machine and the GPU target (Colab Pro+ or lab workstation). Record exact versions in `docs/environment.md`. Acceptance: `pytest` green, `scripts/smoke_e2e.sh` prints `smoke OK`."
+      - title: "Experiment tracking: W&B project, config hashing, run naming convention"
+        body: "Create the W&B project, add a thin `adept.tracking` helper that logs the experiment YAML + git SHA + config hash, and document the run-naming convention `s1/<id>/<arm>/<seed>` in CONTRIBUTING. Acceptance: one logged smoke run."
+      - title: "Data loaders and object-store mirror: registry → images, canonical intermediates cache"
+        body: "Implement the loader that resolves `SlideRecord.path` against `data/raw/<instrument>/`, plus an on-disk cache for canonical concentrations under `data/canonical/`. Acceptance: loader round-trips the synthetic dataset and a real sample acquisition."
+
+  - key: T02
+    review: DR1
+    week: 2
+    labels: [setup, "endpoint:minimum"]
+    title: "Literature review and annotated bibliography"
+    body: |
+      **Week 1–2 · Reading.** Build the reading base the reports will cite: adequacy assessment of core-needle biopsies, colour deconvolution and stain normalisation, and diagnostic-accuracy methodology.
+
+      **Definition of done**
+      - `docs/bibliography.md` with ≥ 25 annotated entries (2–4 sentences each: what it shows, why it matters to ADEPT, what we borrow or reject).
+      - One paragraph per theme stating the design choice ADEPT takes and the alternatives ruled out — this becomes the rationale section of S1-ID-1/2/3.
+
+      **Evidence for the design review:** the bibliography plus a one-page "what we will do differently" summary.
+    subissues:
+      - title: "Adequacy assessment: B-classification, core-needle biopsy adequacy criteria, telepathology QA"
+        body: "Cover NHSBSP B1–B5 definitions, published adequacy criteria for breast core biopsies, and telepathology image-quality QA studies. Output: bibliography section + the justification for the five criteria and the B1 reason codes in `adept.schema`."
+      - title: "Colour deconvolution and stain normalisation: Ruifrok–Johnston, Macenko, Vahadane, calibration-based approaches"
+        body: "Compare unsupervised (Macenko/Vahadane) and calibration-based (single-stain reference slides) estimation of stain vectors; note the case for a canonical space over per-image normalisation. Output: bibliography section + the rationale for ADR 0001 (canonical matrix)."
+      - title: "Diagnostic-accuracy methodology: sensitivity/specificity/AUROC CIs, Cohen's κ, TRIPOD-AI and STARD"
+        body: "Summarise bootstrap CI practice, κ interpretation thresholds, and the TRIPOD-AI / STARD items most relevant to a multi-instrument evaluation. Output: bibliography section + a first pass at the checklists in `docs/reporting/`."
+
+  - key: T03
+    review: DR1
+    week: 2
+    labels: [setup, "endpoint:minimum", "depends:validation"]
+    title: "Reference-standard gate: confirm access to labels and inter-rater κ ≥ 0.75"
+    body: |
+      **Week 2 · Reference standard.** No classifier training may begin until the pathologist B1 / B2+ labels are trusted. This ticket confirms access, computes inter-rater agreement, and locks the label set.
+
+      **Definition of done**
+      - Label schema agreed with the validation workstream (slide_id, B-class, reason codes, annotator id, adjudicated flag) and loaded into `data/labels/` (git-ignored).
+      - Cohen's κ between annotators ≥ 0.75 with a bootstrap CI (`adept.eval.cohens_kappa`), reported overall and per site.
+      - Disagreements adjudicated and the adjudication logged; label set frozen with a content hash recorded in `docs/decisions/`.
+      - Confirmed access to calibration-kit images for **all** instruments and the paired-acquisition schedule agreed with the hardware workstream (before week 3).
+
+      **Evidence for the design review:** the κ table with CIs; the acquisition schedule.
+    subissues:
+      - title: "Agree the label schema and join labels to the slide registry"
+        body: "Define the CSV columns with the clinical lead; write the join to `SlideRecord.label` so every acquisition of a slide inherits its label. Acceptance: registry rows with labels for every physical slide in the pilot set."
+      - title: "Compute inter-rater κ with bootstrap CI, overall and per site"
+        body: "Use `adept.eval.cohens_kappa` inside `bootstrap_ci`; report per site and per reason code where counts allow. Gate: κ ≥ 0.75. If it fails, this ticket stays open and training tickets are blocked."
+      - title: "Adjudicate disagreements, freeze the label set, record the hash as an ADR"
+        body: "Coordinate adjudication with Dr. Kalungi / Dr. Okecha; store the adjudicated labels; write `docs/decisions/0003-reference-standard-v1.md` with counts, κ, and the label-file hash."
+
+  # ───────────────────────── DR2 · Weeks 3–4 ─────────────────────────
+  - key: T04
+    review: DR2
+    week: 3
+    labels: ["S1-ID-1", "endpoint:minimum", "depends:hardware"]
+    title: "Calibration-kit protocol v1 and kit image acquisition on every instrument"
+    body: |
+      **Week 3 · S1-ID-1.** Turn `docs/protocols/calibration_kit.md` from a draft into the protocol the hardware workstream actually executes, and get the kit imaged on the OpenFlexure, the reference scanner and the 3D-printed microscope.
+
+      **Definition of done**
+      - Protocol v1 reviewed with the hardware workstream (exposure lock, non-saturation check, file-naming convention, ≥ 3 blank fields, ≥ 2 pure-H / pure-E fields, resolution target at best focus).
+      - Kit images delivered under `data/calibration_kits/<instrument>/` for all three instruments, with acquisition metadata (exposure, gain, WB, date, operator).
+      - A QC script flags saturation and missing frames before derivation.
+
+      **Evidence for the design review:** the protocol document and a contact sheet of the kit images per instrument.
+    subissues:
+      - title: "Finalise calibration-kit protocol v1 with the hardware workstream"
+        body: "Walk through `docs/protocols/calibration_kit.md` with the hardware lead; add the acquisition-settings table and the non-saturation rule (< 95 % full scale). Acceptance: protocol signed off in the doc header."
+      - title: "Kit acquisition on the OpenFlexure and the reference scanner"
+        body: "Coordinate the session; receive PNG/TIFF frames named `pure_h_*`, `pure_e_*`, `blank_*`, `target_*`; run the QC script. Acceptance: QC passes for both instruments."
+      - title: "Kit acquisition on the 3D-printed microscope"
+        body: "Same as above for the 3D-printed microscope (Target endpoint). Acceptance: QC passes; note any deviations from protocol in `metadata`."
+
+  - key: T05
+    review: DR2
+    week: 3
+    labels: ["S1-ID-1", "endpoint:minimum"]
+    title: "Derive per-instrument calibrations for the OpenFlexure and the reference scanner"
+    body: |
+      **Week 3 · S1-ID-1.** From the kit images, derive each instrument's stain-deconvolution matrix (OD, SVD/Macenko, pseudo-inverse), spectral correction and illumination flat-field, and save them as `artifacts/calibrations/<instrument>.json`.
+
+      **Definition of done**
+      - `adept calibrate derive` runs on real kit images for both instruments; the JSON files are committed (small, no patient content).
+      - Calibration summary table: stain vectors, angle to canonical, flat-field non-uniformity, focus reference — with the Macenko estimate on the H&E control slide as a cross-check (angle < 5°).
+      - Any change to the derivation code is covered by a test on the synthetic kit.
+
+      **Evidence for the design review:** the calibration summary table and the before/after flat-field images.
+    subissues:
+      - title: "OD transform and stain-matrix derivation from pure-H / pure-E frames (OpenFlexure, scanner)"
+        body: "Run `stain_matrix_from_single_stains` on the corrected kit frames; compare against `estimate_stain_vectors_macenko` on the H&E control slide. Acceptance: angle between the two estimates < 5° per stain; if not, investigate saturation/blur first."
+      - title: "Illumination flat-field and spectral correction; per-stain gain against the scanner reference"
+        body: "Derive the absolute-unit flat-field (ADR 0002) and spectral gain; use `--reference scanner.json` so the OpenFlexure's stain gains sit on the scanner's concentration scale. Acceptance: corrected blank ≈ 1.0 ± 0.02 everywhere."
+      - title: "Commit calibration JSONs and the S1-ID-1 calibration summary table"
+        body: "Save both calibrations under `artifacts/calibrations/`, generate the summary table via `InstrumentCalibration.summary()`, and add it to the S1-ID-1 report skeleton."
+
+  - key: T06
+    review: DR2
+    week: 4
+    labels: ["S1-ID-1", "endpoint:target"]
+    title: "3D-printed microscope calibration and the canonical-space definition (ADR)"
+    body: |
+      **Week 4 · S1-ID-1.** Add the third instrument and *decide* the canonical image space from measured spectral differences rather than borrowed constants (supersedes ADR 0001).
+
+      **Definition of done**
+      - `artifacts/calibrations/printed3d.json` derived and summarised.
+      - `CANONICAL_STAIN_MATRIX` replaced by a justified choice (e.g. the reference scanner's vectors or the mean over instruments), with the reasoning and the measured angles in `docs/decisions/0004-canonical-stain-matrix.md`.
+      - Canonical mapping validated on one paired slide set: same physical slides on ≥ 2 instruments agree in canonical space (`adept calibrate validate`).
+
+      **Evidence for the design review:** the ADR and the first paired-slide invariance table.
+    subissues:
+      - title: "Derive and summarise the 3D-printed microscope calibration"
+        body: "Same derivation as T05 for `printed3d`; pay attention to its stronger vignetting and blur. Acceptance: summary table row added; corrected blank ≈ 1.0."
+      - title: "Decide the canonical stain matrix from measured instrument vectors — write ADR 0004"
+        body: "Tabulate the three instruments' H and E vectors and their pairwise angles; choose the canonical target and justify it; update `adept.calibration.canonical.CANONICAL_STAIN_MATRIX`; re-run the test suite."
+      - title: "Validate the canonical mapping on one paired slide set"
+        body: "Run `adept calibrate validate --raw` on the first paired set (OpenFlexure vs scanner). Acceptance: inter/intra ratio < 1 for mean-H and mean-E with CI upper bound < 1, and lower than the raw ratio."
+
+  # ───────────────────────── DR3 · Weeks 5–6 ─────────────────────────
+  - key: T07
+    review: DR3
+    week: 5
+    labels: ["S1-ID-1", "endpoint:target", "endpoint:maximum"]
+    title: "Paired-slide residual analysis with error bars, re-runnable protocol, and calibration-stability check"
+    body: |
+      **Week 5 · S1-ID-1.** The falsifiable claim of the semester: after calibration, inter-instrument variation on the same physical slide is smaller than intra-instrument slide-to-slide variation.
+
+      **Definition of done**
+      - Full residual analysis across all instruments: inter- vs intra-instrument variation with bootstrap CIs and ICC(2,1), before and after calibration (`adept.eval.invariance`).
+      - The calibration protocol documented so that it is re-runnable; (Maximum) executed end-to-end by someone other than the student from the written instructions alone.
+      - (Maximum) Kit re-run after ≥ 1 week; drift quantified (stain-vector angle, flat-field non-uniformity, focus reference).
+
+      **Evidence for the design review:** the invariance figure (before/after) and the drift table.
+    subissues:
+      - title: "Inter- vs intra-instrument residual analysis across all instruments, with CIs and ICC"
+        body: "Extend `adept calibrate validate` output to a figure: per statistic, inter and intra bars with CIs, raw vs canonical. Acceptance: figure + table in the report."
+      - title: "Independent re-run of the calibration protocol from the written instructions"
+        body: "A hardware-workstream member (not the student) derives a calibration from the doc alone; compare against the student's result (angle < 2°, non-uniformity within 5 %). Log any ambiguity found in the protocol and fix the doc."
+      - title: "Calibration-stability (drift) check on a kit re-run"
+        body: "Re-image the kit ≥ 1 week later; compute `stain_angle_deg` between calibrations and the change in flat-field non-uniformity and focus reference; propose a re-calibration trigger."
+
+  - key: T08
+    review: DR3
+    week: 5
+    labels: ["S1-ID-1", "endpoint:minimum"]
+    title: "S1-ID-1 report (calibrations and canonical space) and repository tag `s1-id1`"
+    body: |
+      **Week 5 · Deliverable S1-ID-1 (10 %).** A 6–10 page technical report documenting the calibration protocol, per-instrument derivations, the canonical-space definition and the paired-slide validation — plus code, matrices, flat-fields and a README committed to the repository.
+
+      **Definition of done**
+      - Report written by the student (course-agreement AI clause) and submitted.
+      - All figures and tables regenerable from tagged code (`make figures-s1-id1` or documented commands).
+      - Annotated tag `s1-id1` on the commit that produced the numbers.
+
+      **Evidence for the design review:** the report and the tag.
+    subissues:
+      - title: "Assemble S1-ID-1 figures and tables from tagged code"
+        body: "Calibration summary table, stain-vector plot, flat-field images, invariance figure. Each must be produced by a script under `scripts/` reading `configs/experiments/`."
+      - title: "Write the S1-ID-1 report (student-authored)"
+        body: "Protocol · derivations · canonical-space definition and ADR · paired-slide validation · limits and risks · what it means for S1-ID-2. Rubric: rationale 20 %, execution 20 %, quantitative analysis 20 %, outcomes 20 %, reproducibility 10 %, integration 10 %."
+      - title: "Tag `s1-id1` and check the archive is complete"
+        body: "Verify calibrations, code, configs and README are in the tagged commit; run the smoke test from a fresh clone at the tag."
+
+  - key: T09
+    review: DR3
+    week: 6
+    labels: ["S1-ID-2", "endpoint:minimum"]
+    title: "Criterion 1 (tissue/core detection) and Criterion 3 (staining quality) on real canonical-space images"
+    body: |
+      **Week 6 · S1-ID-2.** Bring the first two criterion modules from synthetic-data scaffolds to validated measurements on real acquisitions, with thresholds justified from data rather than placeholders.
+
+      **Definition of done**
+      - `adept.criteria.tissue`: connected-component core detection with core count and length calibrated in µm from the resolution target; thresholds in `configs/models/criteria.yaml` justified against pathologist "insufficient tissue" reason codes.
+      - `adept.criteria.staining`: H/E OD ratio from calibrated, un-normalised concentrations; range justified against "poor staining" reason codes.
+      - Each module evaluated with error bars (agreement with pathologist reason codes on the labelled set).
+
+      **Evidence for the design review:** per-module evaluation plots and the threshold ADR.
+    subissues:
+      - title: "Tissue/core detection: µm calibration from the resolution target, thresholds from reason codes"
+        body: "Measure µm/px per instrument from `target_*` frames; set `tissue_min_total_length_um` / `tissue_min_core_length_um` from the distribution of pathologist-called insufficient-tissue slides. Acceptance: ROC of tissue score vs reason code with CI."
+      - title: "Staining quality: H/E ratio range and minimum H from labelled poor-staining slides"
+        body: "Plot mean-H vs mean-E for adequate vs poor-staining slides per instrument; set `staining_he_ratio_range` and `staining_min_h_od`; confirm the values are stable across instruments after calibration."
+      - title: "Per-module evaluation with error bars and threshold ADR 0005"
+        body: "Report each criterion's discriminative power (AUROC with CI) against its matching reason code; record the chosen thresholds and their justification in `docs/decisions/0005-criteria-thresholds-v1.md`."
+
+  # ───────────────────────── DR4 · Weeks 7–8 ─────────────────────────
+  - key: T10
+    review: DR4
+    week: 7
+    labels: ["S1-ID-2", "endpoint:minimum", "endpoint:target"]
+    title: "Criterion 4 (focus-quality map, per-instrument calibrated) and Criterion 2 (cellularity via pretrained nucleus model)"
+    body: |
+      **Week 7 · S1-ID-2.** The focus map is also the signal that closes the loop (refocus/rescan ROIs), so its per-instrument calibration must be right; cellularity moves from the classical detector to a pretrained nucleus model.
+
+      **Definition of done**
+      - Focus: tile-wise contrast-normalised sharpness relative to each instrument's `focus_reference`; threshold justified from a through-focus series and "out of focus" reason codes.
+      - Cellularity: nuclei/mm² from a pretrained nucleus detector (e.g. StarDist H&E) plugged into `assess_cellularity(detector=…)`; threshold from "low cellularity" reason codes.
+      - (Maximum) two nucleus-detection approaches compared (classical vs pretrained DL) on agreement with pathologist cellularity calls.
+
+      **Evidence for the design review:** the focus-map figure on a through-focus series; cellularity agreement plot.
+    subissues:
+      - title: "Focus map: through-focus series per instrument, relative-sharpness threshold, closed-loop ROI actions"
+        body: "Use the hardware workstream's through-focus stacks to plot relative sharpness vs defocus; set `focus_min_relative_sharpness` where pathologists call the tile unreadable; confirm `refocus` ROIs point at those tiles."
+      - title: "Cellularity: integrate a pretrained nucleus detector and set the density threshold"
+        body: "Wrap StarDist (or equivalent) as a `NucleusDetector` on canonical H&E RGB; compare nuclei/mm² against reason codes; set `cellularity_min_nuclei_per_mm2`."
+      - title: "Compare two nucleus-detection approaches (classical vs pretrained DL)"
+        body: "Maximum endpoint. Agreement with pathologist cellularity calls, run time per overview scan on the deployment hardware, and instrument invariance of each; recommend one."
+
+  - key: T11
+    review: DR4
+    week: 8
+    labels: ["S1-ID-2", "endpoint:minimum", "endpoint:target", "depends:validation"]
+    title: "Criterion 5: labelled artifact patch set and trained four-class artifact detector with mask output"
+    body: |
+      **Week 8 · S1-ID-2.** Replace the heuristic fold/bubble finder with a trained detector for folds, air bubbles, crush and desiccation, producing a mask the ROI ranker can use.
+
+      **Definition of done**
+      - Labelled patch set (≥ 200 patches per class + clean), labelled with the validation workstream, stored under `data/labels/artifacts/` with a split that respects slide boundaries.
+      - `ArtifactPatchNet` trained (W&B run logged); per-class precision/recall with CIs; mask output verified on whole overview scans.
+      - Minimum endpoint fallback: the single-type (fold) detector evaluated if labelling is late.
+
+      **Evidence for the design review:** confusion matrix with CIs and a gallery of predicted masks.
+    subissues:
+      - title: "Build the labelled artifact patch set (fold, bubble, crush, desiccation, clean)"
+        body: "Define patch size and labelling guide; extract candidates with the heuristic detector to speed labelling; have labels checked by a pathologist. Acceptance: class counts table; no slide in both train and test."
+      - title: "Train and evaluate the four-class artifact classifier"
+        body: "Train `ArtifactPatchNet` (or a small pretrained backbone) with class weighting; report per-class metrics with bootstrap CIs; compare against the heuristic baseline."
+      - title: "Mask output on whole scans and integration into `assess_artifact`"
+        body: "Run `TorchArtifactDetector.predict_mask` on full overview scans; check `fraction_tissue_affected` agrees with pathologist artifact reason codes; wire it in as the default detector when weights are present."
+
+  # ───────────────────────── DR5 · Weeks 9–10 ─────────────────────────
+  - key: T12
+    review: DR5
+    week: 9
+    labels: ["S1-ID-2", "endpoint:target", "endpoint:maximum"]
+    title: "Instrument-invariance analysis per criterion and five-criterion assembly into the agreed schema"
+    body: |
+      **Week 9 · S1-ID-2.** Verify that each criterion measures the slide, not the microscope, and assemble the five measurements into the `AdequacyReport` schema.
+
+      **Definition of done**
+      - Full invariance table: for every criterion, inter/intra-instrument ratio with CI and ICC on the paired subset, across all instruments (`adept.eval.invariance_table`).
+      - `assess_all` output conforms to `adept.schema` v1.1.0 on real scans; schema reviewed with the hardware and validation workstreams.
+      - (Maximum) reason-code outputs compared against pathologist-stated reasons (per-code precision/recall).
+
+      **Evidence for the design review:** the invariance table and a sample `AdequacyReport` JSON.
+    subissues:
+      - title: "Per-criterion invariance table on the paired subset, all instruments"
+        body: "Build the (slides × instruments) matrix per criterion value; run `invariance_table`; flag any criterion with ratio ≥ 1 and investigate its calibration dependence."
+      - title: "Five-criterion assembly and schema conformance on real scans"
+        body: "Run the pipeline on ≥ 20 real overview scans; validate every output against the Pydantic schema; review field semantics with the hardware workstream (ROI actions) and validation workstream (reason codes)."
+      - title: "Reason codes vs pathologist-stated reasons"
+        body: "Maximum endpoint. For B1 slides, compare emitted reason codes with the pathologist's reasons; report per-code precision/recall with CIs; adjust reason-code logic in `CriterionCombiner.report`."
+
+  - key: T13
+    review: DR5
+    week: 9
+    labels: ["S1-ID-2", "endpoint:minimum"]
+    title: "S1-ID-2 report (five criteria and invariance) and repository tag `s1-id2`"
+    body: |
+      **Week 9 · Deliverable S1-ID-2 (10 %).** Report documenting the five modules, their per-module evaluations and the invariance analysis, with module code, trained artifact weights and a README committed.
+
+      **Definition of done**
+      - Student-authored report submitted; figures regenerable from tagged code.
+      - Trained artifact weights archived (Zenodo-ready bundle; DOI or path recorded).
+      - Annotated tag `s1-id2`.
+    subissues:
+      - title: "Assemble S1-ID-2 figures and tables from tagged code"
+        body: "Per-module evaluation plots, artifact confusion matrix, the invariance table/figure, a sample report JSON."
+      - title: "Write the S1-ID-2 report (student-authored)"
+        body: "Five modules · evaluations with error bars · invariance analysis · limits · implications for S1-ID-3."
+      - title: "Archive weights, tag `s1-id2`, verify reproducibility from a fresh clone"
+        body: "Upload artifact weights to the object store / Zenodo sandbox; record the location in the README; tag and re-run the figure scripts at the tag."
+
+  - key: T14
+    review: DR5
+    week: 10
+    labels: ["S1-ID-3", "endpoint:minimum", "endpoint:target"]
+    title: "Lock the site- and instrument-stratified split and train the integrated adequacy classifier (architecture experiment)"
+    body: |
+      **Week 10 · S1-ID-3.** Freeze the evaluation data, then train the classifier arms: the transparent five-criterion combiner, EfficientNet-B0 fine-tuned, and the same network from scratch.
+
+      **Definition of done**
+      - Locked split created with `adept splits make` (stratified by site × label; no physical slide crosses splits via any instrument); saved under `configs/splits/s1_locked.json` with its hash; never edited afterwards.
+      - All arms trained on identical slides in canonical space (W&B runs logged with config hash); decision threshold chosen on the validation split for sensitivity ≥ 0.90.
+      - Architecture comparison table with bootstrap CIs on the validation split (test split untouched until T15).
+
+      **Evidence for the design review:** the split summary (counts per site × instrument × label) and the arm comparison.
+    subissues:
+      - title: "Create and lock the S1 split; verify no slide leakage"
+        body: "Run `adept splits make --seed <chosen>`; run `assert_no_slide_leakage` against the full registry; commit the split file and record the seed and counts in ADR 0006."
+      - title: "Train the five-criterion combiner and the two EfficientNet-B0 arms"
+        body: "Use `configs/experiments/s1_id3_architecture.yaml`; implement `scripts/s1_train_cnn.py`; log every run; pick thresholds on validation via `threshold_for_sensitivity`."
+      - title: "Architecture comparison on the validation split with bootstrap CIs"
+        body: "Table of sensitivity / specificity / AUROC per arm with CIs; select the carry-forward arm with the advisor; record the decision as an ADR."
+
+  # ───────────────────────── DR6 · Weeks 11–12 ─────────────────────────
+  - key: T15
+    review: DR6
+    week: 11
+    labels: ["S1-ID-3", "endpoint:minimum", "endpoint:target", "endpoint:maximum"]
+    title: "Held-out validation against the reference standard: sensitivity, specificity, AUROC, κ with CIs — overall and per instrument"
+    body: |
+      **Week 11 · S1-ID-3.** The core result of the semester: how closely the classifier agrees with the pathologist, on every instrument, on the locked test split — reported once.
+
+      **Definition of done**
+      - Sensitivity, specificity, AUROC with bootstrap 95 % CIs and Cohen's κ vs the reference standard: overall and per instrument (`adept.eval.per_group_metrics`), checked against the performance budget (≥ 0.90 / ≥ 0.85 / ≥ 0.92 / κ ≥ 0.75).
+      - Calibration analysis (reliability diagram, Brier score).
+      - (Maximum) decision-threshold analysis tied to the clinical cost of a missed B1; failure-case gallery organised by instrument.
+
+      **Evidence for the design review:** the headline metrics table with CIs and the calibration plot.
+    subissues:
+      - title: "Locked test-split evaluation: metrics with CIs, overall and per instrument"
+        body: "One run of the carry-forward arm on the test split; `per_group_metrics` by instrument and by site; `meets_targets` table. No re-tuning after this run."
+      - title: "Calibration analysis and cost-based decision-threshold analysis"
+        body: "Reliability diagram and Brier score; sweep thresholds on the validation split under a stated cost ratio for missed B1 vs unnecessary rescan; justify the deployed threshold."
+      - title: "Failure-case gallery organised by instrument"
+        body: "Maximum endpoint. For each instrument, the false negatives and false positives with criterion scores and the pathologist's reason; identify systematic failure modes for the report and for Semester 2."
+
+  - key: T16
+    review: DR6
+    week: 12
+    labels: ["S1-ID-3", "endpoint:minimum", "endpoint:target"]
+    title: "Per-criterion ablation, ROI detection and prioritisation, S1-ID-3 report and tag `s1-id3`"
+    body: |
+      **Week 12 · Deliverable S1-ID-3 (10 %).** Attribute the decision to its criteria, deliver the ranked-ROI output for the hardware workstream, and submit the classifier report.
+
+      **Definition of done**
+      - Ablation: drop each criterion, retrain, re-measure AUROC with CIs; canonical-space signal check (no criterion loses discriminative power in canonical space vs raw).
+      - ROI detection and prioritisation producing a ranked target list (`adept.models.roi`) validated on real scans with the hardware workstream (refocus/rescan/capture actions).
+      - Student-authored report submitted; training + inference code, weights and experiment logs committed; annotated tag `s1-id3`.
+    subissues:
+      - title: "Per-criterion ablation with the canonical-space signal check"
+        body: "Extend `scripts/s1_train_combiner.py` ablation to the carry-forward arm; add the raw-vs-canonical check per criterion; figure with CIs."
+      - title: "ROI detection and prioritisation on real scans; hand-off to the hardware workstream"
+        body: "Tune `rank_rois` limits (max capture / rescan) with the stage controller's budget; verify coordinates map to stage positions; document the ROI action contract in `docs/output_schema.md`."
+      - title: "Write the S1-ID-3 report, archive weights and logs, tag `s1-id3`"
+        body: "Architecture · training · overall and per-instrument performance and concordance · ablation · ROI method · limits. Verify the archive from a fresh clone at the tag."
+
+  # ───────────────────────── DR7 · Weeks 13–14 ─────────────────────────
+  - key: T17
+    review: DR7
+    week: 13
+    labels: ["S1-final", "endpoint:minimum"]
+    title: "Final report synthesis: one validation story from calibration to concordance, figures, TRIPOD-AI and STARD checklists"
+    body: |
+      **Week 13 · Final report (70 %).** Not three reports stapled together: one argument from the calibration procedure and canonical space, through the five criteria and their invariance, to the classifier's concordance with the expert on every instrument and the ablation that says which criteria carry the signal.
+
+      **Definition of done**
+      - Narrative outline agreed with the advisor; every claim mapped to a figure/table with CIs.
+      - TRIPOD-AI and STARD checklists completed with "where reported" filled in (`docs/reporting/`).
+      - Reflection section: limits, what failed, what would be done differently with more data/compute/time; what Semester 2 must test (LOIO, envelope).
+    subissues:
+      - title: "Narrative outline and figure plan mapped to the final-report rubric"
+        body: "Integration 25 % · argument 20 % · evidence 20 % · reflection 15 % · clarity 10 % · reproducibility 10 %. One-page outline reviewed at DR7 prep."
+      - title: "Complete the TRIPOD-AI and STARD checklists"
+        body: "Fill in every item in `docs/reporting/TRIPOD-AI_checklist.md` and `STARD_checklist.md` with section references; list the items that cannot be met and why."
+      - title: "Reflection and critical analysis: limits, failures, Semester 2 hand-off"
+        body: "Draft the limits and failure-mode section from the failure gallery and invariance residuals; state explicitly which claims Semester 2's LOIO validation must confirm."
+
+  - key: T18
+    review: DR7
+    week: 14
+    labels: ["S1-final", "endpoint:minimum"]
+    title: "Final report submission and Semester 1 archive: tag `s1-final`, reproducibility audit, final supervision meeting"
+    body: |
+      **Week 14 · Final.** Submit the student-authored final report and freeze the Semester 1 archive so that someone else could reproduce every metric without asking questions.
+
+      **Definition of done**
+      - Reproducibility audit: from a fresh clone at the tag, every figure and metric in the report regenerates from the archived data splits, calibrations, code, configs and weights.
+      - Annotated tag `s1-final`; archive bundle (calibrations, splits, weights, environment) uploaded with a recorded location/DOI.
+      - Final supervision meeting held; report submitted; Semester 2 kickoff items logged as issues.
+    subissues:
+      - title: "Reproducibility audit from a fresh clone at the tag"
+        body: "Second person runs the documented commands; tick off every figure/table; fix anything that does not regenerate before tagging."
+      - title: "Tag `s1-final` and publish the Semester 1 archive bundle"
+        body: "Calibrations, locked split, weights, experiment logs, environment lockfile; upload; record the location in the README and CHANGELOG (0.2.0)."
+      - title: "Final supervision meeting, submission, and Semester 2 hand-off issues"
+        body: "Submit the report; hold the final meeting; open the S2-ID-1 kickoff issues (LOIO harness, three-arm experiment) with the carry-forward decisions linked."
